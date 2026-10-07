@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>강동 블로그 → 유튜브 제작기 v2</title>
+<title>강동 블로그 → 유튜브 제작기 v3</title>
 <style>
 :root{--bg:#f4f6f8;--card:#fff;--line:#dde2e7;--text:#111827;--muted:#667085;--accent:#1565ff;--dark:#202733;--ok:#157347}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Arial,"Noto Sans KR",sans-serif;color:var(--text)}
@@ -12,15 +12,21 @@ h1{margin:0 0 7px;font-size:30px}.sub{color:var(--muted);line-height:1.6}.card{p
 label{display:block;font-size:13px;font-weight:700;margin:12px 0 6px}input,textarea,select{width:100%;border:1px solid var(--line);border-radius:10px;padding:11px;font:inherit;background:#fff}
 textarea{min-height:130px;resize:vertical}.row{display:grid;grid-template-columns:1fr 160px;gap:10px}.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}button{border:0;border-radius:11px;padding:12px 18px;font-weight:800;cursor:pointer;background:#e9edf2;color:#222}button.primary{background:var(--accent);color:#fff}button.dark{background:var(--dark);color:#fff}button.ok{background:var(--ok);color:#fff}
 .status{margin-top:10px;padding:10px;border-radius:10px;background:#f7f9fb;color:#445;font-size:13px;white-space:pre-wrap}.hidden{display:none}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.box{border:1px solid var(--line);border-radius:12px;padding:13px;background:#fcfcfd}.box h3{margin:0 0 8px;font-size:15px}.pre{white-space:pre-wrap;line-height:1.65;font-size:14px}.scene{padding:12px 0;border-bottom:1px solid #eee}.scene:last-child{border:0}.pill{display:inline-block;background:#eef4ff;color:#174ea6;border-radius:999px;padding:4px 8px;font-size:12px;margin-right:5px;margin-bottom:5px}.small{font-size:12px;color:var(--muted)}
-.photoToolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0}.photoGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.photo{position:relative;border:2px solid transparent;border-radius:13px;background:#f6f8fa;overflow:hidden;min-height:160px}.photo.selected{border-color:var(--accent);background:#eef4ff}.photo img{width:100%;height:150px;object-fit:cover;display:block;background:#eee}.photo .meta{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:8px}.photo .meta label{margin:0;font-size:12px}.photo .meta input{width:19px;height:19px}.photo .badge{position:absolute;top:8px;left:8px;background:rgba(17,24,39,.88);color:#fff;border-radius:999px;padding:4px 8px;font-size:12px;font-weight:700}.scenePhotos{display:flex;gap:7px;flex-wrap:wrap;margin:8px 0}.scenePhotos img{width:92px;height:68px;object-fit:cover;border:1px solid var(--line);border-radius:8px;background:#eee}.reason{font-size:12px;color:#52606d;background:#f8fafc;border-radius:8px;padding:7px;margin:7px 0}
+.photoToolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0}.photoGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.photo{position:relative;border:2px solid transparent;border-radius:13px;background:#f6f8fa;overflow:hidden;min-height:160px}.photo.selected{border-color:var(--accent);background:#eef4ff}.photo img{width:100%;height:150px;object-fit:cover;display:block;background:#eee}.photo .meta{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:8px}.photo .meta label{margin:0;font-size:12px}.photo .meta input{width:19px;height:19px}.photo .badge{position:absolute;top:8px;left:8px;background:rgba(17,24,39,.88);color:#fff;border-radius:999px;padding:4px 8px;font-size:12px;font-weight:700}
+.photo.aiRecommended{box-shadow:0 0 0 3px rgba(21,101,255,.12)}
+.aiTag{position:absolute;top:8px;right:8px;background:#16a34a;color:#fff;border-radius:999px;padding:4px 8px;font-size:11px;font-weight:800}
+.aiNote{padding:0 8px 8px;font-size:11px;line-height:1.35;color:#52606d}
+.aiNote b{color:#174ea6}
+.aiStatus{font-size:12px;color:#445;margin-left:4px}
+.scenePhotos{display:flex;gap:7px;flex-wrap:wrap;margin:8px 0}.scenePhotos img{width:92px;height:68px;object-fit:cover;border:1px solid var(--line);border-radius:8px;background:#eee}.reason{font-size:12px;color:#52606d;background:#f8fafc;border-radius:8px;padding:7px;margin:7px 0}
 @media(max-width:760px){.wrap{padding:10px}.row,.grid{grid-template-columns:1fr}h1{font-size:24px}button{width:100%}.photoGrid{grid-template-columns:repeat(2,1fr)}.photo img{height:125px}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <section class="hero">
-    <h1>강동 블로그 → 유튜브 제작기 <span class="small">v2.1</span></h1>
-    <div class="sub">블로그 글과 사진을 읽고, <b>사진 미리보기 → 사용할 사진 선택 → AI가 장면별 사진 자동 배치</b>까지 합니다.</div>
+    <h1>강동 블로그 → 유튜브 제작기 <span class="small">v3</span></h1>
+    <div class="sub">블로그 글과 사진을 읽고, <b>AI 사진 자동선택 → 장면별 사진 자동 배치</b>까지 합니다.</div>
   </section>
 
   <section class="card">
@@ -40,9 +46,11 @@ textarea{min-height:130px;resize:vertical}.row{display:grid;grid-template-column
 
     <div class="photoToolbar">
       <button onclick="renderPhotosFromText()">사진 미리보기 갱신</button>
+      <button class="ok" id="aiSelectBtn" onclick="autoSelectPhotos()">AI 사진 자동선택</button>
       <button onclick="setAllPhotos(true)">전체 선택</button>
       <button onclick="setAllPhotos(false)">전체 해제</button>
       <span id="photoCount" class="small">사진 0장</span>
+      <span id="photoAiStatus" class="aiStatus"></span>
     </div>
     <div id="photoGrid" class="photoGrid"></div>
   </section>
@@ -128,16 +136,29 @@ function schedulePhotoRefresh(){clearTimeout(refreshTimer);refreshTimer=setTimeo
 
 function renderPhotosFromText(){
   const urls=parseImageLines();
-  const oldSelected=new Set(photoItems.filter(x=>x.selected).map(x=>x.url));
-  photoItems=urls.map((url,i)=>({index:i+1,url,selected:oldSelected.size?oldSelected.has(url):true}));
+  const oldByUrl=new Map(photoItems.map(x=>[x.url,x]));
+  const hadOld=photoItems.length>0;
+  photoItems=urls.map((url,i)=>{
+    const old=oldByUrl.get(url);
+    return {
+      index:i+1,
+      url,
+      selected:old ? old.selected : !hadOld,
+      aiRecommended:old?.aiRecommended||false,
+      aiRole:old?.aiRole||'',
+      aiReason:old?.aiReason||'',
+      aiScore:old?.aiScore||0
+    };
+  });
   renderPhotoGrid();
 }
 
 function renderPhotoGrid(){
   $('photoCount').textContent=`사진 ${photoItems.length}장 · 선택 ${photoItems.filter(x=>x.selected).length}장`;
   $('photoGrid').innerHTML=photoItems.map((p,i)=>`
-    <div class="photo ${p.selected?'selected':''}" data-i="${i}">
+    <div class="photo ${p.selected?'selected':''} ${p.aiRecommended?'aiRecommended':''}" data-i="${i}">
       <span class="badge">사진 ${p.index}</span>
+      ${p.aiRecommended?`<span class="aiTag">AI 추천</span>`:''}
       <img src="${directImageUrl(p.url)}"
            loading="lazy"
            referrerpolicy="no-referrer"
@@ -147,10 +168,51 @@ function renderPhotoGrid(){
         <label>영상에 사용</label>
         <input type="checkbox" ${p.selected?'checked':''} onchange="togglePhoto(${i},this.checked)">
       </div>
+      ${p.aiRecommended?`<div class="aiNote"><b>${escapeHtml(p.aiRole||'추천')}</b><br>${escapeHtml(p.aiReason||'영상에 활용하기 좋은 대표 사진')}</div>`:''}
     </div>`).join('');
 }
 function togglePhoto(i,checked){photoItems[i].selected=checked;renderPhotoGrid();}
 function setAllPhotos(v){photoItems.forEach(p=>p.selected=v);renderPhotoGrid();}
+
+async function autoSelectPhotos(){
+  if(!photoItems.length && parseImageLines().length) renderPhotosFromText();
+  if(!photoItems.length){alert('먼저 블로그 사진을 불러와주세요.');return;}
+
+  const btn=$('aiSelectBtn');
+  btn.disabled=true;
+  $('photoAiStatus').textContent=`AI가 사진 ${photoItems.length}장을 비교하는 중...`;
+  try{
+    const r=await fetch('/api/select-images',{
+      method:'POST',
+      headers:{'content-type':'application/json'},
+      body:JSON.stringify({
+        title:$('title').value.trim(),
+        text:$('text').value.trim(),
+        images:photoItems.map(p=>({index:p.index,url:p.url})),
+        target:18
+      })
+    });
+    const j=await r.json();
+    if(!r.ok) throw new Error(j.error||'사진 자동선택 실패');
+
+    const picked=new Map((j.selected||[]).map(v=>[Number(v.index),v]));
+    photoItems.forEach(p=>{
+      const a=picked.get(Number(p.index));
+      p.selected=!!a;
+      p.aiRecommended=!!a;
+      p.aiRole=a?.role||'';
+      p.aiReason=a?.reason||'';
+      p.aiScore=Number(a?.score)||0;
+    });
+
+    renderPhotoGrid();
+    $('photoAiStatus').textContent=`AI 추천 ${picked.size}장 선택 완료 · 필요하면 체크를 직접 수정하세요.`;
+  }catch(e){
+    $('photoAiStatus').textContent='오류: '+e.message;
+  }finally{
+    btn.disabled=false;
+  }
+}
 
 async function generatePlan(){
   const text=$('text').value.trim(); if(text.length<50){alert('블로그 본문을 입력해주세요.');return;}
