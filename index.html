@@ -3,23 +3,24 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>강동 블로그 → 유튜브 제작기</title>
+<title>강동 블로그 → 유튜브 제작기 v2</title>
 <style>
-:root{--bg:#f4f6f8;--card:#fff;--line:#dde2e7;--text:#111827;--muted:#667085;--accent:#1565ff;--dark:#202733}
+:root{--bg:#f4f6f8;--card:#fff;--line:#dde2e7;--text:#111827;--muted:#667085;--accent:#1565ff;--dark:#202733;--ok:#157347}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Arial,"Noto Sans KR",sans-serif;color:var(--text)}
-.wrap{max-width:1060px;margin:auto;padding:24px}.hero,.card{background:#fff;border:1px solid var(--line);border-radius:18px}.hero{padding:24px;margin-bottom:14px}
+.wrap{max-width:1120px;margin:auto;padding:24px}.hero,.card{background:#fff;border:1px solid var(--line);border-radius:18px}.hero{padding:24px;margin-bottom:14px}
 h1{margin:0 0 7px;font-size:30px}.sub{color:var(--muted);line-height:1.6}.card{padding:18px;margin-bottom:14px}.card h2{margin:0 0 12px;font-size:19px}
 label{display:block;font-size:13px;font-weight:700;margin:12px 0 6px}input,textarea,select{width:100%;border:1px solid var(--line);border-radius:10px;padding:11px;font:inherit;background:#fff}
-textarea{min-height:130px;resize:vertical}.row{display:grid;grid-template-columns:1fr 160px;gap:10px}.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}button{border:0;border-radius:11px;padding:12px 18px;font-weight:800;cursor:pointer;background:#e9edf2;color:#222}button.primary{background:var(--accent);color:#fff}button.dark{background:var(--dark);color:#fff}
-.status{margin-top:10px;padding:10px;border-radius:10px;background:#f7f9fb;color:#445;font-size:13px;white-space:pre-wrap}.hidden{display:none}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.box{border:1px solid var(--line);border-radius:12px;padding:13px;background:#fcfcfd}.box h3{margin:0 0 8px;font-size:15px}.pre{white-space:pre-wrap;line-height:1.65;font-size:14px}.scene{padding:10px 0;border-bottom:1px solid #eee}.scene:last-child{border:0}.pill{display:inline-block;background:#eef4ff;color:#174ea6;border-radius:999px;padding:4px 8px;font-size:12px;margin-right:5px}.small{font-size:12px;color:var(--muted)}
-@media(max-width:760px){.wrap{padding:10px}.row,.grid{grid-template-columns:1fr}h1{font-size:24px}button{width:100%}}
+textarea{min-height:130px;resize:vertical}.row{display:grid;grid-template-columns:1fr 160px;gap:10px}.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}button{border:0;border-radius:11px;padding:12px 18px;font-weight:800;cursor:pointer;background:#e9edf2;color:#222}button.primary{background:var(--accent);color:#fff}button.dark{background:var(--dark);color:#fff}button.ok{background:var(--ok);color:#fff}
+.status{margin-top:10px;padding:10px;border-radius:10px;background:#f7f9fb;color:#445;font-size:13px;white-space:pre-wrap}.hidden{display:none}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.box{border:1px solid var(--line);border-radius:12px;padding:13px;background:#fcfcfd}.box h3{margin:0 0 8px;font-size:15px}.pre{white-space:pre-wrap;line-height:1.65;font-size:14px}.scene{padding:12px 0;border-bottom:1px solid #eee}.scene:last-child{border:0}.pill{display:inline-block;background:#eef4ff;color:#174ea6;border-radius:999px;padding:4px 8px;font-size:12px;margin-right:5px;margin-bottom:5px}.small{font-size:12px;color:var(--muted)}
+.photoToolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0}.photoGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.photo{position:relative;border:2px solid transparent;border-radius:13px;background:#f6f8fa;overflow:hidden;min-height:160px}.photo.selected{border-color:var(--accent);background:#eef4ff}.photo img{width:100%;height:150px;object-fit:cover;display:block;background:#eee}.photo .meta{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:8px}.photo .meta label{margin:0;font-size:12px}.photo .meta input{width:19px;height:19px}.photo .badge{position:absolute;top:8px;left:8px;background:rgba(17,24,39,.88);color:#fff;border-radius:999px;padding:4px 8px;font-size:12px;font-weight:700}.scenePhotos{display:flex;gap:7px;flex-wrap:wrap;margin:8px 0}.scenePhotos img{width:92px;height:68px;object-fit:cover;border:1px solid var(--line);border-radius:8px;background:#eee}.reason{font-size:12px;color:#52606d;background:#f8fafc;border-radius:8px;padding:7px;margin:7px 0}
+@media(max-width:760px){.wrap{padding:10px}.row,.grid{grid-template-columns:1fr}h1{font-size:24px}button{width:100%}.photoGrid{grid-template-columns:repeat(2,1fr)}.photo img{height:125px}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <section class="hero">
-    <h1>강동 블로그 → 유튜브 제작기</h1>
-    <div class="sub">1단계 버전: 블로그 글과 사진을 읽어 <b>유튜브 제목 · 썸네일 문구 · 5분 대본 · 장면 구성 · 설명란</b>을 자동으로 만듭니다.</div>
+    <h1>강동 블로그 → 유튜브 제작기 <span class="small">v2</span></h1>
+    <div class="sub">블로그 글과 사진을 읽고, <b>사진 미리보기 → 사용할 사진 선택 → AI가 장면별 사진 자동 배치</b>까지 합니다.</div>
   </section>
 
   <section class="card">
@@ -34,15 +35,23 @@ textarea{min-height:130px;resize:vertical}.row{display:grid;grid-template-column
     <label>글 제목</label><input id="title" placeholder="자동 입력 또는 직접 입력">
     <label>블로그 본문 <span class="small">자동 수집이 안 되면 여기 붙여넣기</span></label>
     <textarea id="text" placeholder="블로그 본문을 붙여넣어도 됩니다."></textarea>
-    <label>사진 URL <span class="small">한 줄에 하나 / 자동 수집 시 자동 입력</span></label>
-    <textarea id="images" style="min-height:90px" placeholder="https://...jpg"></textarea>
+    <label>사진 URL <span class="small">한 줄에 하나 / 직접 수정 가능</span></label>
+    <textarea id="images" style="min-height:90px" placeholder="https://...jpg" oninput="schedulePhotoRefresh()"></textarea>
+
+    <div class="photoToolbar">
+      <button onclick="renderPhotosFromText()">사진 미리보기 갱신</button>
+      <button onclick="setAllPhotos(true)">전체 선택</button>
+      <button onclick="setAllPhotos(false)">전체 해제</button>
+      <span id="photoCount" class="small">사진 0장</span>
+    </div>
+    <div id="photoGrid" class="photoGrid"></div>
   </section>
 
   <section class="card">
-    <h2>2. 유튜브 초안 만들기</h2>
+    <h2>2. 유튜브 초안 + 사진 배치 만들기</h2>
     <div class="row">
       <select id="minutes"><option value="3">약 3분</option><option value="5" selected>약 5분</option><option value="7">약 7분</option></select>
-      <button class="dark" onclick="generatePlan()">유튜브 초안 만들기</button>
+      <button class="dark" onclick="generatePlan()">초안 + 사진 배치</button>
     </div>
     <div id="genStatus" class="status">아직 생성하지 않았습니다.</div>
   </section>
@@ -55,7 +64,7 @@ textarea{min-height:130px;resize:vertical}.row{display:grid;grid-template-column
     </div>
     <div class="box" style="margin-top:12px"><h3>첫 15초</h3><div id="hook" class="pre"></div></div>
     <div class="box" style="margin-top:12px"><h3>전체 내레이션</h3><div id="narration" class="pre"></div></div>
-    <div class="box" style="margin-top:12px"><h3>장면 구성</h3><div id="scenes"></div></div>
+    <div class="box" style="margin-top:12px"><h3>장면 구성 + 자동 배치 사진</h3><div id="scenes"></div></div>
     <div class="grid" style="margin-top:12px">
       <div class="box"><h3>설명란</h3><div id="description" class="pre"></div></div>
       <div class="box"><h3>해시태그 / 확인 안 된 정보</h3><div id="meta" class="pre"></div></div>
@@ -69,39 +78,88 @@ textarea{min-height:130px;resize:vertical}.row{display:grid;grid-template-column
 </div>
 <script>
 let lastResult=null;
+let photoItems=[];
+let refreshTimer=null;
 const $=id=>document.getElementById(id);
+
+function parseImageLines(){
+  return $('images').value.split(/\n+/).map(x=>x.trim()).filter(Boolean);
+}
+function proxyUrl(url){return `/api/image?url=${encodeURIComponent(url)}`;}
+
 async function extractBlog(){
   $('extractStatus').textContent='네이버 블로그를 읽는 중입니다...';
   try{
     const r=await fetch('/api/extract',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({url:$('url').value.trim()})});
     const j=await r.json();
     if(!r.ok) throw new Error(j.error||'추출 실패');
-    $('title').value=j.title||'';$('text').value=j.text||'';$('images').value=(j.images||[]).join('\n');
+    $('title').value=j.title||'';
+    $('text').value=j.text||'';
+    $('images').value=(j.images||[]).join('\n');
+    renderPhotosFromText();
     $('extractStatus').textContent=`완료: 본문 ${j.text.length.toLocaleString()}자 / 사진 ${(j.images||[]).length}장`;
   }catch(e){
     $('extractStatus').textContent=`자동 수집 실패: ${e.message}\n본문을 아래 칸에 직접 붙여넣어도 다음 단계는 정상 작동합니다.`;
   }
 }
+
+function schedulePhotoRefresh(){clearTimeout(refreshTimer);refreshTimer=setTimeout(renderPhotosFromText,450);}
+
+function renderPhotosFromText(){
+  const urls=parseImageLines();
+  const oldSelected=new Set(photoItems.filter(x=>x.selected).map(x=>x.url));
+  photoItems=urls.map((url,i)=>({index:i+1,url,selected:oldSelected.size?oldSelected.has(url):true}));
+  renderPhotoGrid();
+}
+
+function renderPhotoGrid(){
+  $('photoCount').textContent=`사진 ${photoItems.length}장 · 선택 ${photoItems.filter(x=>x.selected).length}장`;
+  $('photoGrid').innerHTML=photoItems.map((p,i)=>`
+    <div class="photo ${p.selected?'selected':''}" data-i="${i}">
+      <span class="badge">사진 ${p.index}</span>
+      <img src="${proxyUrl(p.url)}" loading="lazy" alt="사진 ${p.index}" onerror="this.style.opacity='.25';this.alt='미리보기 실패'">
+      <div class="meta">
+        <label>영상에 사용</label>
+        <input type="checkbox" ${p.selected?'checked':''} onchange="togglePhoto(${i},this.checked)">
+      </div>
+    </div>`).join('');
+}
+function togglePhoto(i,checked){photoItems[i].selected=checked;renderPhotoGrid();}
+function setAllPhotos(v){photoItems.forEach(p=>p.selected=v);renderPhotoGrid();}
+
 async function generatePlan(){
   const text=$('text').value.trim(); if(text.length<50){alert('블로그 본문을 입력해주세요.');return;}
-  $('genStatus').textContent='AI가 유튜브 대본과 장면을 만드는 중입니다...';
+  if(!photoItems.length && parseImageLines().length) renderPhotosFromText();
+  const selected=photoItems.filter(x=>x.selected).map(x=>({index:x.index,url:x.url}));
+  $('genStatus').textContent=`AI가 대본을 만들고 사진 ${selected.length}장을 보면서 장면별로 배치하는 중입니다...`;
   try{
-    const images=$('images').value.split(/\n+/).map(x=>x.trim()).filter(Boolean);
-    const r=await fetch('/api/generate',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({title:$('title').value.trim(),text,images,minutes:Number($('minutes').value)})});
+    const r=await fetch('/api/generate',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({title:$('title').value.trim(),text,images:selected,minutes:Number($('minutes').value)})});
     const j=await r.json(); if(!r.ok) throw new Error(j.error||'생성 실패');
-    lastResult=j.result; renderResult(lastResult); $('genStatus').textContent=`완료 · 사용 모델: ${j.model}`;
+    lastResult=j.result; renderResult(lastResult); $('genStatus').textContent=`완료 · 사진 ${j.images_used||0}장 분석 · 사용 모델: ${j.model}`;
   }catch(e){$('genStatus').textContent='오류: '+e.message;}
 }
+
+function getPhotoByIndex(idx){return photoItems.find(p=>Number(p.index)===Number(idx));}
 function renderResult(x){
-  $('resultCard').classList.remove('hidden');$('ytTitle').textContent=x.youtube_title||'';$('thumb').textContent=x.thumbnail_text||'';$('hook').textContent=x.hook||'';$('narration').textContent=x.narration||'';$('description').textContent=x.description||'';
-  $('scenes').innerHTML=(x.scenes||[]).map(s=>`<div class="scene"><span class="pill">장면 ${s.scene}</span><span class="pill">${s.seconds||0}초</span><span class="pill">사진 ${s.image_index||'-'}</span><div><b>${escapeHtml(s.caption||'')}</b></div><div class="small">${escapeHtml(s.narration||'')}</div></div>`).join('');
-  $('meta').textContent=`${(x.hashtags||[]).join(' ')}\n\n영상에서 제외한 확인 불가 정보:\n${(x.facts_not_confirmed||[]).map(v=>'• '+v).join('\n')||'없음'}`;
+  $('resultCard').classList.remove('hidden');
+  $('ytTitle').textContent=x.youtube_title||'';$('thumb').textContent=x.thumbnail_text||'';$('hook').textContent=x.hook||'';$('narration').textContent=x.narration||'';$('description').textContent=x.description||'';
+  $('scenes').innerHTML=(x.scenes||[]).map(s=>{
+    const indices=Array.isArray(s.image_indices)?s.image_indices:(s.image_index?[s.image_index]:[]);
+    const thumbs=indices.map(idx=>{const p=getPhotoByIndex(idx);return p?`<img src="${proxyUrl(p.url)}" title="사진 ${idx}" alt="사진 ${idx}">`:''}).join('');
+    return `<div class="scene">
+      <span class="pill">장면 ${s.scene}</span><span class="pill">${s.seconds||0}초</span>${indices.map(i=>`<span class="pill">사진 ${i}</span>`).join('')}
+      ${thumbs?`<div class="scenePhotos">${thumbs}</div>`:''}
+      ${s.image_reason?`<div class="reason">사진 선택 이유: ${escapeHtml(s.image_reason)}</div>`:''}
+      <div><b>${escapeHtml(s.caption||'')}</b></div><div class="small">${escapeHtml(s.narration||'')}</div>
+    </div>`;
+  }).join('');
+  $('meta').textContent=`${(x.hashtags||[]).join(' ')}\n\n확인 필요 정보:\n${(x.facts_not_confirmed||[]).map(v=>'• '+v).join('\n')||'없음'}`;
   window.scrollTo({top:$('resultCard').offsetTop-20,behavior:'smooth'});
 }
 function escapeHtml(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));}
 function resultText(){if(!lastResult)return '';return `제목\n${lastResult.youtube_title}\n\n썸네일\n${lastResult.thumbnail_text}\n\nHOOK\n${lastResult.hook}\n\n대본\n${lastResult.narration}\n\n설명란\n${lastResult.description}\n\n해시태그\n${(lastResult.hashtags||[]).join(' ')}`;}
 async function copyAll(){if(!lastResult)return;await navigator.clipboard.writeText(resultText());alert('복사했습니다.');}
-function dl(name,content,type='text/plain'){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type}));a.download=name;a.click();URL.revokeObjectURL(a.href);}
+function dl(name,content,type='text/plain'){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
 function downloadTxt(){dl('youtube-plan.txt',resultText());}
 function downloadJson(){if(lastResult)dl('youtube-plan.json',JSON.stringify(lastResult,null,2),'application/json');}
 </script>
