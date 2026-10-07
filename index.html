@@ -19,7 +19,7 @@ textarea{min-height:130px;resize:vertical}.row{display:grid;grid-template-column
 <body>
 <div class="wrap">
   <section class="hero">
-    <h1>강동 블로그 → 유튜브 제작기 <span class="small">v2</span></h1>
+    <h1>강동 블로그 → 유튜브 제작기 <span class="small">v2.1</span></h1>
     <div class="sub">블로그 글과 사진을 읽고, <b>사진 미리보기 → 사용할 사진 선택 → AI가 장면별 사진 자동 배치</b>까지 합니다.</div>
   </section>
 
@@ -85,7 +85,28 @@ const $=id=>document.getElementById(id);
 function parseImageLines(){
   return $('images').value.split(/\n+/).map(x=>x.trim()).filter(Boolean);
 }
+function directImageUrl(url){
+  try{
+    const u=new URL(url);
+    // Naver thumbnail URLs are more reliable with an explicit width type.
+    if(u.hostname.includes('mblogthumb-phinf.pstatic.net') && !u.searchParams.has('type')){
+      u.searchParams.set('type','w800');
+    }
+    return u.toString();
+  }catch{
+    return url;
+  }
+}
 function proxyUrl(url){return `/api/image?url=${encodeURIComponent(url)}`;}
+function imageFallback(img, originalUrl){
+  if(img.dataset.fallback==='1'){
+    img.style.opacity='.25';
+    img.alt='미리보기 실패';
+    return;
+  }
+  img.dataset.fallback='1';
+  img.src=proxyUrl(originalUrl);
+}
 
 async function extractBlog(){
   $('extractStatus').textContent='네이버 블로그를 읽는 중입니다...';
@@ -117,7 +138,11 @@ function renderPhotoGrid(){
   $('photoGrid').innerHTML=photoItems.map((p,i)=>`
     <div class="photo ${p.selected?'selected':''}" data-i="${i}">
       <span class="badge">사진 ${p.index}</span>
-      <img src="${proxyUrl(p.url)}" loading="lazy" alt="사진 ${p.index}" onerror="this.style.opacity='.25';this.alt='미리보기 실패'">
+      <img src="${directImageUrl(p.url)}"
+           loading="lazy"
+           referrerpolicy="no-referrer"
+           alt="사진 ${p.index}"
+           onerror="imageFallback(this,${JSON.stringify(p.url)})">
       <div class="meta">
         <label>영상에 사용</label>
         <input type="checkbox" ${p.selected?'checked':''} onchange="togglePhoto(${i},this.checked)">
@@ -145,7 +170,7 @@ function renderResult(x){
   $('ytTitle').textContent=x.youtube_title||'';$('thumb').textContent=x.thumbnail_text||'';$('hook').textContent=x.hook||'';$('narration').textContent=x.narration||'';$('description').textContent=x.description||'';
   $('scenes').innerHTML=(x.scenes||[]).map(s=>{
     const indices=Array.isArray(s.image_indices)?s.image_indices:(s.image_index?[s.image_index]:[]);
-    const thumbs=indices.map(idx=>{const p=getPhotoByIndex(idx);return p?`<img src="${proxyUrl(p.url)}" title="사진 ${idx}" alt="사진 ${idx}">`:''}).join('');
+    const thumbs=indices.map(idx=>{const p=getPhotoByIndex(idx);return p?`<img src="${directImageUrl(p.url)}" referrerpolicy="no-referrer" title="사진 ${idx}" alt="사진 ${idx}" onerror="imageFallback(this,${JSON.stringify(p.url)})">`:''}).join('');
     return `<div class="scene">
       <span class="pill">장면 ${s.scene}</span><span class="pill">${s.seconds||0}초</span>${indices.map(i=>`<span class="pill">사진 ${i}</span>`).join('')}
       ${thumbs?`<div class="scenePhotos">${thumbs}</div>`:''}

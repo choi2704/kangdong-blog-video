@@ -37,7 +37,6 @@ function looksLikeNaverImage(url = '') {
   const s = url.toLowerCase();
   if (!/^https?:\/\//.test(s)) return false;
 
-  // Naver blog images are commonly served from these CDN patterns.
   const naverCdn =
     /(?:postfiles|blogfiles|post-phinf|blogpfthumb-phinf|blogthumb|phinf)\.(?:pstatic|naver)\.net/.test(s) ||
     /(?:pstatic|naver)\.net/.test(s);
@@ -51,7 +50,6 @@ function looksLikeNaverImage(url = '') {
 }
 
 function imageKey(url = '') {
-  // Same photo can appear with different Naver resize query strings.
   return url
     .replace(/[?&]type=[^&]+/i, '')
     .replace(/[?&]w=\d+/i, '')
@@ -63,11 +61,9 @@ function collectUrlsFromString(raw = '') {
   const text = decodeLoose(raw);
   const found = [];
 
-  // Whole string may itself be a URL.
   const whole = normalizeUrl(text);
   if (looksLikeNaverImage(whole)) found.push(whole);
 
-  // Also catch URLs embedded inside JSON / attributes / script data.
   const re = /https?:\/\/[^\s"'<>\\]+/gi;
   for (const m of text.matchAll(re)) {
     const u = normalizeUrl(m[0].replace(/[),}\]]+$/, ''));
@@ -97,8 +93,6 @@ function parseContent(html) {
     ? $('.se-main-container').first()
     : ($('#postViewArea').first().length ? $('#postViewArea').first() : $('body'));
 
-  // IMPORTANT: collect images BEFORE removing scripts/UI.
-  // Naver can keep image URLs in lazy attributes or serialized data attributes.
   const images = [];
   const seen = new Set();
 
@@ -113,7 +107,6 @@ function parseContent(html) {
     }
   }
 
-  // 1) Normal/lazy-loaded image attributes.
   container.find('img').each((_, el) => {
     const attrs = el.attribs || {};
     [
@@ -127,7 +120,6 @@ function parseContent(html) {
     ].forEach(addImage);
   });
 
-  // 2) SmartEditor ONE often stores the original image URL in JSON-ish data attributes.
   container.find('*').each((_, el) => {
     const attrs = el.attribs || {};
     for (const [name, value] of Object.entries(attrs)) {
@@ -136,14 +128,9 @@ function parseContent(html) {
     }
   });
 
-  // 3) Open Graph fallback.
   addImage($('meta[property="og:image"]').attr('content') || '');
-
-  // 4) Last-resort scan of the raw HTML for Naver CDN image URLs.
-  // This catches URLs embedded in scripts/JSON that have no visible <img>.
   for (const u of collectUrlsFromString(html)) addImage(u);
 
-  // Now extract text after removing UI/non-content nodes.
   const textContainer = container.clone();
   textContainer.find('script,style,button,svg,noscript').remove();
   const text = cleanText(textContainer.text());
@@ -174,8 +161,6 @@ export default async function handler(req, res) {
 
     const { blogId, logNo } = parseNaverUrl(url);
 
-    // Try several Naver representations. Some contain text but no image tags,
-    // while others contain the actual SmartEditor image metadata.
     const candidates = [
       `https://m.blog.naver.com/${blogId}/${logNo}`,
       `https://m.blog.naver.com/PostView.naver?blogId=${encodeURIComponent(blogId)}&logNo=${encodeURIComponent(logNo)}`,
@@ -225,10 +210,7 @@ export default async function handler(req, res) {
       title: bestTitle,
       text: bestText.slice(0, 30000),
       images: mergedImages.slice(0, 60),
-      debug: {
-        imageCount: mergedImages.length,
-        candidateErrors: errors
-      }
+      debug: { imageCount: mergedImages.length, candidateErrors: errors }
     });
   } catch (e) {
     res.status(500).json({ error: e?.message || '추출 중 오류가 발생했습니다.' });
