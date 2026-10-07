@@ -25,7 +25,7 @@ textarea{min-height:130px;resize:vertical}.row{display:grid;grid-template-column
 <body>
 <div class="wrap">
   <section class="hero">
-    <h1>강동 블로그 → 유튜브 제작기 <span class="small">v3.1</span></h1>
+    <h1>강동 블로그 → 유튜브 제작기 <span class="small">v3.2</span></h1>
     <div class="sub">블로그 글과 사진을 읽고, <b>AI 사진 자동선택 → 장면별 사진 자동 배치</b>까지 합니다.</div>
   </section>
 
@@ -180,20 +180,53 @@ async function autoSelectPhotos(){
 
   const btn=$('aiSelectBtn');
   btn.disabled=true;
-  $('photoAiStatus').textContent=`AI가 사진 ${photoItems.length}장을 비교하는 중...`;
+
   try{
-    const r=await fetch('/api/select-images',{
+    // Vercel 한 요청에서 60장을 모두 처리하면 시간이 너무 오래 걸립니다.
+    // v3.2는 브라우저가 8장씩 나눠 여러 번 분석 요청을 보내고 마지막에 결과만 합칩니다.
+    const groups=[];
+    for(let i=0;i<photoItems.length;i+=8) groups.push(photoItems.slice(i,i+8));
+
+    const evaluations=[];
+    let completed=0;
+
+    async function runBatch(group,batchNo){
+      const r=await fetch('/api/analyze-images',{
+        method:'POST',
+        headers:{'content-type':'application/json'},
+        body:JSON.stringify({
+          title:$('title').value.trim(),
+          text:$('text').value.trim(),
+          images:group.map(p=>({index:p.index,url:p.url}))
+        })
+      });
+      const j=await r.json();
+      if(!r.ok) throw new Error(j.error||`사진 묶음 ${batchNo+1} 분석 실패`);
+      completed++;
+      $('photoAiStatus').textContent=`AI 사진 분석 ${completed}/${groups.length} 묶음 완료`;
+      return j.photos||[];
+    }
+
+    // 동시에 너무 많이 호출하지 않도록 2개씩 처리
+    for(let i=0;i<groups.length;i+=2){
+      const pair=groups.slice(i,i+2);
+      const result=await Promise.all(pair.map((g,k)=>runBatch(g,i+k)));
+      result.forEach(arr=>evaluations.push(...arr));
+    }
+
+    $('photoAiStatus').textContent='사진 분석 완료 · 대표 사진 최종 선정 중...';
+
+    const r=await fetch('/api/final-select',{
       method:'POST',
       headers:{'content-type':'application/json'},
       body:JSON.stringify({
         title:$('title').value.trim(),
-        text:$('text').value.trim(),
-        images:photoItems.map(p=>({index:p.index,url:p.url})),
-        target:18
+        target:18,
+        evaluations
       })
     });
     const j=await r.json();
-    if(!r.ok) throw new Error(j.error||'사진 자동선택 실패');
+    if(!r.ok) throw new Error(j.error||'최종 사진 선정 실패');
 
     const picked=new Map((j.selected||[]).map(v=>[Number(v.index),v]));
     photoItems.forEach(p=>{
