@@ -23,14 +23,18 @@ button{border:0;border-radius:11px;padding:12px 18px;font-weight:800;cursor:poin
 .scenePhotos{display:flex;gap:7px;flex-wrap:wrap;margin:8px 0}.scenePhotos img{width:92px;height:68px;object-fit:cover;border:1px solid var(--line);border-radius:8px;background:#eee}
 .videoWrap{background:#101820;border-radius:14px;padding:12px;margin-top:12px}.videoWrap video{width:100%;max-height:560px;background:#000;border-radius:10px}.progress{height:10px;background:#e5e7eb;border-radius:99px;overflow:hidden;margin-top:10px}.progress>div{height:100%;width:0;background:var(--accent);transition:width .2s}
 .notice{padding:10px 12px;background:#fff8e6;border:1px solid #f4d48a;border-radius:10px;color:#725b18;font-size:13px;line-height:1.5}
+.uploadBox{border:1px dashed #b9c2cc;border-radius:12px;padding:12px;background:#fafbfc}
+.uploadPreview{margin-top:8px;min-height:80px;display:flex;align-items:center;justify-content:center;background:#eef1f4;border-radius:10px;overflow:hidden}
+.uploadPreview img,.uploadPreview video{width:100%;max-height:180px;object-fit:cover;display:block}
+.fileMeta{font-size:12px;color:var(--muted);margin-top:6px}
 @media(max-width:760px){.wrap{padding:10px}.row,.row3,.grid{grid-template-columns:1fr}h1{font-size:24px}button{width:100%}.photoGrid{grid-template-columns:repeat(2,1fr)}.photo img{height:125px}}
 </style>
 </head>
 <body>
 <div class="wrap">
 <section class="hero">
-  <h1>강동 블로그 → 유튜브 제작기 <span class="small">v4.2</span></h1>
-  <div class="sub">블로그 읽기 → 사진 직접 선택 → 대본/장면 구성 → <b>내레이션·자막 직접 수정 → 1분 영상 생성</b></div>
+  <h1>강동 블로그 → 유튜브 제작기 <span class="small">v4.3</span></h1>
+  <div class="sub">블로그 읽기 → 사진 직접 선택 → 대본/장면 구성 → <b>더 자연스러운 음성 + 부드러운 전환 + 직접 넣는 오프닝/마무리</b></div>
 </section>
 
 <section class="card">
@@ -94,36 +98,60 @@ button{border:0;border-radius:11px;padding:12px 18px;font-weight:800;cursor:poin
   <div class="notice">영상 제작 중에는 이 탭을 다른 창 뒤로 오래 보내거나 컴퓨터를 절전 상태로 만들지 않는 것이 좋습니다. 배경음악 없이 사진·AI 음성·내레이션 자막으로 제작합니다. 사진은 2~4초 간격으로 빠르게 전환됩니다.</div>
   <div class="row3">
     <div><label>AI 음성</label><select id="voice">
-      <option value="coral" selected>Coral - 밝고 또렷함</option>
+      <option value="marin" selected>Marin - 자연스러운 설명톤</option>
+      <option value="coral">Coral - 밝고 또렷함</option>
       <option value="nova">Nova - 부드러움</option>
       <option value="onyx">Onyx - 낮고 안정적</option>
       <option value="sage">Sage - 차분함</option>
-      <option value="marin">Marin - 자연스러움</option>
+    </select></div>
+    <div><label>목소리 느낌</label><select id="voiceStyle">
+      <option value="natural" selected>자연스럽게 대화하듯</option>
+      <option value="warm">따뜻하고 친근하게</option>
+      <option value="calm">차분하고 신뢰감 있게</option>
+      <option value="lively">밝고 경쾌하게</option>
     </select></div>
     <div><label>말하기 속도</label><select id="speed">
-      <option value="0.95">조금 천천히</option>
-      <option value="1" selected>보통</option>
-      <option value="1.08">조금 빠르게</option>
+      <option value="0.93">조금 천천히</option>
+      <option value="0.97" selected>자연스러운 속도</option>
+      <option value="1.03">조금 빠르게</option>
     </select></div>
+  </div>
+  <div class="row3">
     <div><label>화질</label><select id="quality">
       <option value="720" selected>720p 권장</option>
       <option value="1080">1080p 고화질</option>
     </select></div>
-  </div>
-  <div class="row3">
     <div><label>사진 전환 속도</label><select id="photoSpeed">
       <option value="2.3">빠르게 · 약 2.3초</option>
       <option value="3.0" selected>추천 · 약 3초</option>
       <option value="4.0">여유롭게 · 약 4초</option>
     </select></div>
     <div><label>사진 움직임</label><select id="motionStyle">
-      <option value="dynamic" selected>조금 더 역동적으로</option>
-      <option value="soft">부드럽게</option>
-    </select></div>
-    <div><label>자막</label><select id="captionMode">
-      <option value="narration" selected>내레이션 그대로</option>
+      <option value="dynamic" selected>자연스럽게 움직임</option>
+      <option value="soft">아주 부드럽게</option>
     </select></div>
   </div>
+
+  <div class="btns">
+    <button onclick="previewVoice()">🔊 목소리 미리듣기</button>
+  </div>
+
+  <div class="grid" style="margin-top:12px">
+    <div class="uploadBox">
+      <label>오프닝/썸네일 이미지 또는 영상</label>
+      <input id="introMedia" type="file" accept="image/*,video/*" onchange="handleCustomMedia('intro',this.files[0])">
+      <div id="introPreview" class="uploadPreview"><span class="small">선택하지 않으면 자동 제목 화면을 사용합니다.</span></div>
+      <div id="introMeta" class="fileMeta"></div>
+    </div>
+    <div class="uploadBox">
+      <label>마무리 이미지 또는 영상</label>
+      <input id="outroMedia" type="file" accept="image/*,video/*" onchange="handleCustomMedia('outro',this.files[0])">
+      <div id="outroPreview" class="uploadPreview"><span class="small">선택하지 않으면 강동자바라 문의 화면을 사용합니다.</span></div>
+      <div id="outroMeta" class="fileMeta"></div>
+    </div>
+  </div>
+  <div class="small" style="margin-top:8px">※ 추가한 영상은 화면만 사용하며 원본 영상의 소리는 넣지 않습니다.</div>
+
   <div class="btns">
     <button class="primary" id="makeVideoBtn" onclick="makeVideo()">🎬 영상 만들기</button>
     <button id="downloadVideoBtn" class="ok hidden" onclick="downloadVideo()">영상 다운로드</button>
@@ -142,6 +170,9 @@ let photoItems=[];
 let refreshTimer=null;
 let finishedVideoBlob=null;
 let finishedVideoExt='mp4';
+let customIntro=null;
+let customOutro=null;
+let voicePreviewAudio=null;
 const $=id=>document.getElementById(id);
 
 function parseImageLines(){return $('images').value.split(/\n+/).map(x=>x.trim()).filter(Boolean);}
@@ -286,7 +317,8 @@ function syncOverallNarrationToScenes(){
 
 async function fetchAudioBuffer(ctx,text,voice,speed,idx,total){
   $('videoStatus').textContent=`AI 음성 생성 ${idx}/${total}...`;
-  const r=await fetch('/api/tts',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({text,voice,speed})});
+  const style=$('voiceStyle')?.value||'natural';
+  const r=await fetch('/api/tts',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({text,voice,speed,style})});
   if(!r.ok){
     let msg='음성 생성 실패';
     try{const j=await r.json();msg=j.error||msg;}catch{}
@@ -294,6 +326,115 @@ async function fetchAudioBuffer(ctx,text,voice,speed,idx,total){
   }
   const ab=await r.arrayBuffer();
   return await ctx.decodeAudioData(ab.slice(0));
+}
+
+
+async function previewVoice(){
+  try{
+    const voice=$('voice').value;
+    const speed=Number($('speed').value)||0.97;
+    const style=$('voiceStyle').value;
+    const sample='안녕하세요. 강동자바라입니다. 오늘은 제품의 구조와 특징을 쉽고 자연스럽게 설명해드리겠습니다.';
+    const r=await fetch('/api/tts',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({text:sample,voice,speed,style})});
+    if(!r.ok){
+      let msg='목소리 미리듣기 실패';
+      try{const j=await r.json();msg=j.error||msg;}catch{}
+      throw new Error(msg);
+    }
+    const blob=await r.blob();
+    if(voicePreviewAudio){
+      voicePreviewAudio.pause();
+      URL.revokeObjectURL(voicePreviewAudio.src);
+    }
+    voicePreviewAudio=new Audio(URL.createObjectURL(blob));
+    await voicePreviewAudio.play();
+  }catch(e){
+    alert(e.message);
+  }
+}
+
+function revokeCustomMedia(item){
+  if(item?.url)URL.revokeObjectURL(item.url);
+}
+
+function handleCustomMedia(type,file){
+  const preview=$(type+'Preview');
+  const meta=$(type+'Meta');
+
+  if(type==='intro'){revokeCustomMedia(customIntro);customIntro=null;}
+  else{revokeCustomMedia(customOutro);customOutro=null;}
+
+  if(!file){
+    preview.innerHTML='<span class="small">선택된 파일이 없습니다.</span>';
+    meta.textContent='';
+    return;
+  }
+
+  const isVideo=file.type.startsWith('video/');
+  const isImage=file.type.startsWith('image/');
+  if(!isVideo&&!isImage){
+    alert('이미지 또는 영상 파일을 선택해주세요.');
+    return;
+  }
+
+  const item={file,url:URL.createObjectURL(file),type:isVideo?'video':'image',duration:0};
+  if(type==='intro')customIntro=item;else customOutro=item;
+
+  if(isImage){
+    preview.innerHTML=`<img src="${item.url}" alt="">`;
+    meta.textContent=`${file.name} · 이미지`;
+  }else{
+    preview.innerHTML=`<video src="${item.url}" muted controls playsinline></video>`;
+    const v=preview.querySelector('video');
+    v.addEventListener('loadedmetadata',()=>{
+      item.duration=Number.isFinite(v.duration)?v.duration:0;
+      meta.textContent=`${file.name} · 영상 ${item.duration?item.duration.toFixed(1)+'초':''}`;
+    },{once:true});
+  }
+}
+
+async function prepareCustomMedia(item){
+  if(!item)return null;
+  if(item.type==='image'){
+    return await new Promise((resolve,reject)=>{
+      const img=new Image();
+      img.onload=()=>resolve({type:'image',element:img,item});
+      img.onerror=()=>reject(new Error('추가 이미지 파일을 불러오지 못했습니다.'));
+      img.src=item.url;
+    });
+  }
+
+  return await new Promise((resolve,reject)=>{
+    const video=document.createElement('video');
+    video.src=item.url;
+    video.muted=true;
+    video.playsInline=true;
+    video.preload='auto';
+    video.onloadeddata=()=>resolve({type:'video',element:video,item,duration:Math.min(6,Math.max(2,video.duration||3))});
+    video.onerror=()=>reject(new Error('추가 영상 파일을 불러오지 못했습니다.'));
+    video.load();
+  });
+}
+
+function easeSmooth(x){
+  x=Math.max(0,Math.min(1,x));
+  return x*x*(3-2*x);
+}
+
+function drawCustomVisual(ctx,media,w,h,progress,seed){
+  if(!media)return false;
+  if(media.type==='image'){
+    drawCover(ctx,media.element,w,h,easeSmooth(progress),seed,1);
+    return true;
+  }
+  const video=media.element;
+  if(video.readyState>=2){
+    const base=Math.max(w/video.videoWidth,h/video.videoHeight);
+    const dw=video.videoWidth*base,dh=video.videoHeight*base;
+    ctx.drawImage(video,(w-dw)/2,(h-dh)/2,dw,dh);
+    return true;
+  }
+  return false;
 }
 
 async function loadImageForVideo(url){
@@ -319,17 +460,18 @@ function chooseMime(){
 
 function drawCover(ctx,img,w,h,progress,seed,opacity=1){
   const dynamic=$('motionStyle')?.value!=='soft';
+  const p=easeSmooth(progress);
   const base=Math.max(w/img.width,h/img.height);
-  const zoomStart=dynamic?1.02:1.015;
-  const zoomRange=dynamic?0.13:0.075;
-  const zoom=zoomStart+zoomRange*progress;
+  const zoomStart=dynamic?1.018:1.012;
+  const zoomRange=dynamic?0.095:0.055;
+  const zoom=zoomStart+zoomRange*p;
   const scale=base*zoom;
   const dw=img.width*scale,dh=img.height*scale;
   const roomX=Math.max(0,dw-w),roomY=Math.max(0,dh-h);
   const dir=seed%2===0?1:-1;
-  const pan=(progress-.5)*dir;
-  const panX=dynamic?.38:.24;
-  const panY=dynamic?.22:.12;
+  const pan=(p-.5)*dir;
+  const panX=dynamic?.30:.18;
+  const panY=dynamic?.16:.09;
   const x=-(roomX/2)-(roomX*panX*pan);
   const y=-(roomY/2)+(roomY*panY*pan);
   ctx.save();
@@ -405,9 +547,11 @@ async function makeVideo(){
   await audioCtx.resume();
 
   try{
-    const voice=$('voice').value,speed=Number($('speed').value)||1;
+    const voice=$('voice').value,speed=Number($('speed').value)||0.97;
     const scenes=lastResult.scenes;
     const media=[];
+    const introCustom=await prepareCustomMedia(customIntro);
+    const outroCustom=await prepareCustomMedia(customOutro);
 
     for(let i=0;i<scenes.length;i++){
       const s=scenes[i];
@@ -453,7 +597,8 @@ async function makeVideo(){
       recorder.onerror=e=>reject(e.error||new Error('영상 녹화 오류'));
     });
 
-    const intro=2,outro=3;
+    const intro=introCustom ? (introCustom.type==='video' ? Math.min(6,Math.max(2,introCustom.duration||3)) : 3.5) : 2.5;
+    const outro=outroCustom ? (outroCustom.type==='video' ? Math.min(6,Math.max(2,outroCustom.duration||3)) : 4) : 3.5;
     const total=intro+media.reduce((a,b)=>a+b.duration,0)+outro;
     const startAt=audioCtx.currentTime+.6;
 
@@ -464,19 +609,30 @@ async function makeVideo(){
     });
 
     recorder.start(1000);
-    $('videoStatus').textContent=`영상 렌더링 시작 · 약 ${Math.ceil(total)}초 · 사진 빠른 전환 + 내레이션 자막 적용 중...`;
+    if(introCustom?.type==='video'){introCustom.element.currentTime=0;introCustom.element.play().catch(()=>{});}
+    let outroStarted=false;
+    $('videoStatus').textContent=`영상 렌더링 시작 · 약 ${Math.ceil(total)}초 · 자연스러운 전환 + 내레이션 자막 적용 중...`;
 
     function drawFrame(){
       const t=Math.max(0,audioCtx.currentTime-startAt);
       ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
 
       if(t<intro){
-        ctx.fillStyle='#f8fafc';ctx.fillRect(0,0,W,H);
-        ctx.fillStyle='#111827';ctx.textAlign='center';ctx.textBaseline='middle';
+        const p=Math.min(1,t/Math.max(.001,intro));
+        if(introCustom){
+          drawCustomVisual(ctx,introCustom,W,H,p,901);
+          const grad=ctx.createLinearGradient(0,H*.5,0,H);
+          grad.addColorStop(0,'rgba(0,0,0,0)');grad.addColorStop(1,'rgba(0,0,0,.38)');
+          ctx.fillStyle=grad;ctx.fillRect(0,H*.45,W,H*.55);
+        }else{
+          ctx.fillStyle='#f8fafc';ctx.fillRect(0,0,W,H);
+        }
+        ctx.fillStyle=introCustom?'#fff':'#111827';ctx.textAlign='center';ctx.textBaseline='middle';
         ctx.font=`700 ${Math.round(W*.044)}px "Noto Sans KR","Malgun Gothic",sans-serif`;
+        ctx.shadowColor=introCustom?'rgba(0,0,0,.55)':'transparent';ctx.shadowBlur=introCustom?7:0;
         drawCenteredLines(ctx,wrapLines(ctx,lastResult.youtube_title||$('title').value,W*.78,3),W/2,H*.44,Math.round(W*.058));
         ctx.font=`500 ${Math.round(W*.018)}px "Noto Sans KR","Malgun Gothic",sans-serif`;
-        ctx.fillStyle='#52606d';ctx.fillText('강동자바라',W/2,H*.72);
+        ctx.fillText('강동자바라',W/2,H*.72);ctx.shadowBlur=0;
       }else{
         const st=getSceneAt(media,t);
         if(st.type==='scene'){
@@ -491,11 +647,14 @@ async function makeVideo(){
             const localP=pos-slot;
             const cur=imgs[slot%imgs.length];
             const next=imgs[(slot+1)%imgs.length];
-            const fadeStart=.78;
+            const slotSec=st.duration/slots;
+            const transitionSec=Math.min(.75,Math.max(.45,slotSec*.28));
+            const fadeStart=Math.max(0,1-transitionSec/Math.max(.001,slotSec));
             if(localP>fadeStart&&imgs.length>1){
-              const f=(localP-fadeStart)/(1-fadeStart);
+              const raw=(localP-fadeStart)/(1-fadeStart);
+              const f=easeSmooth(raw);
               drawCover(ctx,cur,W,H,Math.min(1,localP),st.i+slot,1-f);
-              drawCover(ctx,next,W,H,Math.max(0,(localP-fadeStart)),st.i+slot+1,f);
+              drawCover(ctx,next,W,H,0,st.i+slot+1,f);
             }else{
               drawCover(ctx,cur,W,H,Math.min(1,localP),st.i+slot,1);
             }
@@ -521,14 +680,31 @@ async function makeVideo(){
           drawCenteredLines(ctx,lines,W/2,H*.82,Math.round(W*.045));
           ctx.shadowBlur=0;
         }else{
-          ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
-          ctx.fillStyle='#111827';ctx.textAlign='center';ctx.textBaseline='middle';
+          const outroStart=total-outro;
+          const op=Math.min(1,Math.max(0,(t-outroStart)/Math.max(.001,outro)));
+          if(outroCustom){
+            if(outroCustom.type==='video'&&!outroStarted){
+              outroStarted=true;
+              outroCustom.element.currentTime=0;
+              outroCustom.element.play().catch(()=>{});
+            }
+            drawCustomVisual(ctx,outroCustom,W,H,op,902);
+            const grad=ctx.createLinearGradient(0,H*.45,0,H);
+            grad.addColorStop(0,'rgba(0,0,0,0)');grad.addColorStop(1,'rgba(0,0,0,.48)');
+            ctx.fillStyle=grad;ctx.fillRect(0,H*.4,W,H*.6);
+            ctx.fillStyle='#fff';
+          }else{
+            ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);ctx.fillStyle='#111827';
+          }
+          ctx.textAlign='center';ctx.textBaseline='middle';
+          ctx.shadowColor=outroCustom?'rgba(0,0,0,.55)':'transparent';ctx.shadowBlur=outroCustom?7:0;
           ctx.font=`700 ${Math.round(W*.05)}px "Noto Sans KR","Malgun Gothic",sans-serif`;
           ctx.fillText('강동자바라',W/2,H*.37);
           ctx.font=`600 ${Math.round(W*.03)}px "Noto Sans KR","Malgun Gothic",sans-serif`;
-          ctx.fillStyle='#333';ctx.fillText('제작 · 시공 · 상담',W/2,H*.51);
+          ctx.fillText('제작 · 시공 · 상담',W/2,H*.51);
           ctx.font=`800 ${Math.round(W*.045)}px Arial,sans-serif`;
           ctx.fillText('1577-6084',W/2,H*.64);
+          ctx.shadowBlur=0;
         }
       }
 
