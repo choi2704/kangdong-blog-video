@@ -209,40 +209,105 @@ function directImageUrl(url){
   }catch{return url;}
 }
 function proxyUrl(url){return `/api/image?url=${encodeURIComponent(url)}`;}
-function imageFallback(img,originalUrl){
-  if(img.dataset.fallback==='1'){img.style.opacity='.25';img.alt='미리보기 실패';return;}
-  img.dataset.fallback='1';img.src=proxyUrl(originalUrl);
+// v4.4.2: 정상 사진만 검증한 뒤 번호를 부여합니다.
+let photoScanId=0;
+let photoScanRunning=false;
+const unwantedPhotoName=/(?:^|[\/_?.=&-])(logo|icon|favicon|profile|avatar|emoji|sticker|banner|spacer|sprite|thumbnail_logo|ogq_)(?:[\/_?.=&-]|$)/i;
+function canonicalPhotoKey(url){
+  try{
+    const u=new URL(url);
+    // 네이버 이미지 리사이즈 옵션은 동일 원본으로 처리
+    ['type','w','h','width','height','size','quality'].forEach(k=>u.searchParams.delete(k));
+    u.hash='';
+    return u.origin.toLowerCase()+u.pathname+u.search;
+  }catch{return url.split('?')[0];}
 }
-
+function htmlSafe(s){return String(s).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
+function probePhoto(src,timeout=11000){
+  return new Promise(resolve=>{
+    const im=new Image();let done=false;
+    const timer=setTimeout(()=>finish(null),timeout);
+    function finish(value){if(done)return;done=true;clearTimeout(timer);im.onload=null;im.onerror=null;resolve(value);}
+    im.onload=()=>finish({width:im.naturalWidth,height:im.naturalHeight});
+    im.onerror=()=>finish(null);
+    im.referrerPolicy='no-referrer';
+    im.src=src;
+  });
+}
+async function inspectPhoto(url){
+  if(unwantedPhotoName.test(url))return null;
+  // 같은 출처의 프록시를 먼저 확인해 CORS/네이버 외부 링크 문제를 줄임.
+  const proxied=proxyUrl(url);
+  let size=await probePhoto(proxied);
+  let displayUrl=proxied;
+  if(!size){size=await probePhoto(directImageUrl(url));displayUrl=directImageUrl(url);}
+  if(!size)return null;
+  const {width,height}=size;
+  // 자그마한 UI 아이콘, 지나치게 긴 배너 제외. 제품 세로 사진은 유지.
+  if(width<180||height<180||width*height<60000)return null;
+  if(Math.max(width,height)/Math.min(width,height)>5.5)return null;
+  return {url,displayUrl,width,height};
+}
 async function extractBlog(){
   $('extractStatus').textContent='네이버 블로그를 읽는 중입니다...';
   try{
     const r=await fetch('/api/extract',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({url:$('url').value.trim()})});
     const j=await r.json();if(!r.ok)throw new Error(j.error||'추출 실패');
     $('title').value=j.title||'';$('text').value=j.text||'';$('images').value=(j.images||[]).join('\n');
-    renderPhotosFromText();
-    $('extractStatus').textContent=`완료: 본문 ${(j.text||'').length.toLocaleString()}자 / 사진 ${(j.images||[]).length}장`;
+    await renderPhotosFromText();
+    $('extractStatus').textContent=`완료: 본문 ${(j.text||'').length.toLocaleString()}자 / 정상 사진 ${photoItems.length}장 (원본 ${(j.images||[]).length}장)`;
   }catch(e){$('extractStatus').textContent='자동 수집 실패: '+e.message;}
 }
 function schedulePhotoRefresh(){clearTimeout(refreshTimer);refreshTimer=setTimeout(renderPhotosFromText,450);}
-function renderPhotosFromText(){
-  const urls=parseImageLines();const old=new Map(photoItems.map(x=>[x.url,x]));
-  photoItems=urls.map((url,i)=>({index:i+1,url,selected:old.get(url)?.selected ?? true}));
+async function renderPhotosFromText(){
+  const id=++photoScanId;
+  photoScanRunning=true;
+  const original=parseImageLines();
+  const old=new Map(photoItems.map(p=>[canonicalPhotoKey(p.url),p]));
+  photoItems=[];
+  $('photoGrid').innerHTML='';
+  const unique=[];const seen=new Set();
+  for(const url of original){
+    const key=canonicalPhotoKey(url);
+    if(!key||seen.has(key))continue;
+    seen.add(key);unique.push(url);
+  }
+  $('photoCount').textContent=`사진 검사 중... 0 / ${unique.length}장`;
+  // 동시 요청을 제한해 네이버 이미지 서버와 서버리스 함수를 과부하시키지 않음.
+  const verified=new Array(unique.length);
+  let next=0,done=0;
+  async function worker(){
+    while(id===photoScanId){
+      const i=next++;if(i>=unique.length)break;
+      try{verified[i]=await inspectPhoto(unique[i]);}catch{verified[i]=null;}
+      done++;
+      if(id===photoScanId)$('photoCount').textContent=`사진 검사 중... ${done} / ${unique.length}장`;
+    }
+  }
+  await Promise.all(Array.from({length:Math.min(5,unique.length)},()=>worker()));
+  if(id!==photoScanId)return;
+  photoItems=verified.filter(Boolean).map((p,i)=>({...p,index:i+1,selected:old.get(canonicalPhotoKey(p.url))?.selected??true}));
+  // 사용자가 직접 편집할 수 있는 URL에도 정상 사진만 남기고 1번부터 재번호.
+  $('images').value=photoItems.map(p=>p.url).join('\n');
+  photoScanRunning=false;
   renderPhotoGrid();
+  $('photoCount').textContent=`정상 사진 ${photoItems.length}장 · 제외 ${original.length-photoItems.length}장 · 선택 ${photoItems.filter(p=>p.selected).length}장`;
 }
 function renderPhotoGrid(){
-  $('photoCount').textContent=`사진 ${photoItems.length}장 · 선택 ${photoItems.filter(x=>x.selected).length}장`;
+  if(photoScanRunning)return;
+  $('photoCount').textContent=`정상 사진 ${photoItems.length}장 · 선택 ${photoItems.filter(p=>p.selected).length}장`;
   $('photoGrid').innerHTML=photoItems.map((p,i)=>`
     <div class="photo ${p.selected?'selected':''}">
       <span class="badge">사진 ${p.index}</span>
-      <img src="${directImageUrl(p.url)}" loading="lazy" referrerpolicy="no-referrer" onerror="imageFallback(this,${JSON.stringify(p.url)})">
+      <img src="${htmlSafe(p.displayUrl)}" loading="lazy" referrerpolicy="no-referrer" alt="사진 ${p.index}">
       <div class="meta"><label>영상에 사용</label><input type="checkbox" ${p.selected?'checked':''} onchange="togglePhoto(${i},this.checked)"></div>
     </div>`).join('');
 }
-function togglePhoto(i,v){photoItems[i].selected=v;renderPhotoGrid();}
+function togglePhoto(i,v){if(photoItems[i])photoItems[i].selected=v;renderPhotoGrid();}
 function setAllPhotos(v){photoItems.forEach(p=>p.selected=v);renderPhotoGrid();}
 
 async function generatePlan(){
+  if(photoScanRunning){alert('사진 검사가 끝난 뒤 초안을 생성해주세요.');return;}
   const text=$('text').value.trim();if(text.length<50){alert('블로그 본문을 입력해주세요.');return;}
   const selected=photoItems.filter(x=>x.selected).map(x=>({index:x.index,url:x.url}));
   if(!selected.length){alert('영상에 사용할 사진을 한 장 이상 선택해주세요.');return;}
