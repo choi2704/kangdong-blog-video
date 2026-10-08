@@ -1,10 +1,20 @@
 import * as cheerio from 'cheerio';
 
 function parseNaverUrl(input) {
-  const u = new URL(input);
+  const raw = String(input || '').trim();
+  const u = new URL(raw);
+
+  // 일반 주소: https://blog.naver.com/kdjavara/224433952240
+  // 모바일 주소: https://m.blog.naver.com/kdjavara/224433952240
   const m = u.pathname.match(/^\/([^/]+)\/(\d+)/);
-  if (!m) throw new Error('네이버 블로그 글 주소 형식이 아닙니다.');
-  return { blogId: m[1], logNo: m[2] };
+  if (m) return { blogId: m[1], logNo: m[2] };
+
+  // PostView 주소도 지원
+  const blogId = u.searchParams.get('blogId');
+  const logNo = u.searchParams.get('logNo');
+  if (blogId && /^\d+$/.test(logNo || '')) return { blogId, logNo };
+
+  throw new Error('네이버 블로그 글 주소를 확인해주세요.');
 }
 
 function cleanText(s = '') {

@@ -1,0 +1,17 @@
+v4.4.1 FIX
+
+확인된 문제
+- index.html의 JavaScript에서 join() 문자열 안에 실제 줄바꿈이 들어가 SyntaxError 발생
+- 이 오류 때문에 페이지의 JavaScript 전체가 실행되지 않아 '블로그 읽기' 버튼도 동작하지 않음
+
+수정
+- join('\n\n') 정상화
+- 네이버 일반/모바일/PostView 주소 파싱 보강
+- 화면 상단 버전을 v4.4.1 FIX로 표시
+
+적용
+1. 이 ZIP 전체를 GitHub kangdong-blog-video 저장소에 덮어쓰기
+2. Commit changes
+3. Vercel 자동 배포 완료 후 강력 새로고침 Ctrl+F5
+4. 상단에서 v4.4.1 FIX 확인
+5. 블로그 주소 입력 후 '블로그 읽기' 테스트
