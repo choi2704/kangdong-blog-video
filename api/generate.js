@@ -37,7 +37,10 @@ export default async function handler(req, res) {
 
     const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     const model = process.env.OPENAI_MODEL || 'gpt-6-luna';
-    const sceneCount = minutes <= 3 ? 7 : minutes >= 7 ? 12 : 9;
+    const sceneCount = minutes <= 1 ? 7 : minutes <= 3 ? 8 : minutes >= 7 ? 12 : 9;
+    const lengthGuide = minutes <= 1
+      ? '전체 내레이션은 약 55~70초 분량으로 아주 간결하게 작성하세요. 장면당 1~2문장, 전체 7장면 안팎으로 구성하세요.'
+      : `전체 내레이션은 약 ${minutes}분 분량으로 작성하세요.`;
     const selectedIds = (images || []).map(x => x.index).join(', ') || '(사진 없음)';
 
     const prompt = `당신은 강동자바라 유튜브 롱폼 영상 기획자입니다.
@@ -45,6 +48,8 @@ export default async function handler(req, res) {
 
 중요:
 - 블로그에 없는 제품 사양, 가격, 안전기준, 성능을 지어내지 마세요.
+- ${lengthGuide}
+- 1분 영상일 때는 서론을 길게 쓰지 말고 첫 5초 안에 핵심을 말하세요.
 - "블로그 글에서 확인되지 않습니다" 같은 문장을 영상 대본 안에서 반복하지 말고, 꼭 필요한 경우만 자연스럽게 표현하세요.
 - 시청자가 듣기 편한 짧은 구어체 문장으로 작성하세요.
 - 사진은 사용자가 직접 고른 상태입니다. 장면별 사진 번호는 서버가 블로그 사진 순서대로 자동 배치하므로 JSON에는 넣지 마세요.

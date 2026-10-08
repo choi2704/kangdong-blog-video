@@ -24,8 +24,8 @@ button{border:0;border-radius:11px;padding:12px 18px;font-weight:800;cursor:poin
 <body>
 <div class="wrap">
 <section class="hero">
-  <h1>강동 블로그 → 유튜브 제작기 <span class="small">v4</span></h1>
-  <div class="sub">블로그 읽기 → 사진 직접 선택 → 대본/장면 구성 → <b>AI 음성 + 자막 + 사진 움직임 → 영상 파일 생성</b></div>
+  <h1>강동 블로그 → 유튜브 제작기 <span class="small">v4.1</span></h1>
+  <div class="sub">블로그 읽기 → 사진 직접 선택 → 대본/장면 구성 → <b>내레이션 자막 + 빠른 사진 전환 + 움직임 → 1분 영상 생성</b></div>
 </section>
 
 <section class="card">
@@ -54,7 +54,7 @@ button{border:0;border-radius:11px;padding:12px 18px;font-weight:800;cursor:poin
 <section class="card">
   <h2>2. 유튜브 초안 + 사진 배치</h2>
   <div class="row">
-    <select id="minutes"><option value="3">약 3분</option><option value="5" selected>약 5분</option><option value="7">약 7분</option></select>
+    <select id="minutes"><option value="1" selected>약 1분</option><option value="3">약 3분</option><option value="5">약 5분</option><option value="7">약 7분</option></select>
     <button class="dark" onclick="generatePlan()">초안 + 사진 배치</button>
   </div>
   <div id="genStatus" class="status">아직 생성하지 않았습니다.</div>
@@ -77,7 +77,7 @@ button{border:0;border-radius:11px;padding:12px 18px;font-weight:800;cursor:poin
 
 <section id="videoCard" class="card hidden">
   <h2>4. 실제 영상 만들기</h2>
-  <div class="notice">영상 제작 중에는 이 탭을 다른 창 뒤로 오래 보내거나 컴퓨터를 절전 상태로 만들지 않는 것이 좋습니다. 첫 버전은 배경음악 없이 사진·AI 음성·자막으로 제작합니다.</div>
+  <div class="notice">영상 제작 중에는 이 탭을 다른 창 뒤로 오래 보내거나 컴퓨터를 절전 상태로 만들지 않는 것이 좋습니다. 배경음악 없이 사진·AI 음성·내레이션 자막으로 제작합니다. 사진은 2~4초 간격으로 빠르게 전환됩니다.</div>
   <div class="row3">
     <div><label>AI 음성</label><select id="voice">
       <option value="coral" selected>Coral - 밝고 또렷함</option>
@@ -94,6 +94,20 @@ button{border:0;border-radius:11px;padding:12px 18px;font-weight:800;cursor:poin
     <div><label>화질</label><select id="quality">
       <option value="720" selected>720p 권장</option>
       <option value="1080">1080p 고화질</option>
+    </select></div>
+  </div>
+  <div class="row3">
+    <div><label>사진 전환 속도</label><select id="photoSpeed">
+      <option value="2.3">빠르게 · 약 2.3초</option>
+      <option value="3.0" selected>추천 · 약 3초</option>
+      <option value="4.0">여유롭게 · 약 4초</option>
+    </select></div>
+    <div><label>사진 움직임</label><select id="motionStyle">
+      <option value="dynamic" selected>조금 더 역동적으로</option>
+      <option value="soft">부드럽게</option>
+    </select></div>
+    <div><label>자막</label><select id="captionMode">
+      <option value="narration" selected>내레이션 그대로</option>
     </select></div>
   </div>
   <div class="btns">
@@ -222,17 +236,25 @@ function chooseMime(){
   return list.find(t=>MediaRecorder.isTypeSupported(t))||'';
 }
 
-function drawCover(ctx,img,w,h,progress,seed){
+function drawCover(ctx,img,w,h,progress,seed,opacity=1){
+  const dynamic=$('motionStyle')?.value!=='soft';
   const base=Math.max(w/img.width,h/img.height);
-  const zoom=1.03+0.07*progress;
+  const zoomStart=dynamic?1.02:1.015;
+  const zoomRange=dynamic?0.13:0.075;
+  const zoom=zoomStart+zoomRange*progress;
   const scale=base*zoom;
   const dw=img.width*scale,dh=img.height*scale;
   const roomX=Math.max(0,dw-w),roomY=Math.max(0,dh-h);
   const dir=seed%2===0?1:-1;
   const pan=(progress-.5)*dir;
-  const x=-(roomX/2)-(roomX*.28*pan);
-  const y=-(roomY/2)+(roomY*.15*pan);
+  const panX=dynamic?.38:.24;
+  const panY=dynamic?.22:.12;
+  const x=-(roomX/2)-(roomX*panX*pan);
+  const y=-(roomY/2)+(roomY*panY*pan);
+  ctx.save();
+  ctx.globalAlpha=opacity;
   ctx.drawImage(img,x,y,dw,dh);
+  ctx.restore();
 }
 
 function wrapLines(ctx,text,maxWidth,maxLines=3){
@@ -248,6 +270,35 @@ function wrapLines(ctx,text,maxWidth,maxLines=3){
 
 function drawCenteredLines(ctx,lines,x,y,lineH){
   lines.forEach((line,i)=>ctx.fillText(line,x,y+i*lineH));
+}
+
+
+function splitNarrationCaptions(text){
+  const clean=String(text||'').replace(/\s+/g,' ').trim();
+  if(!clean)return [];
+  const sentences=clean.split(/(?<=[.!?。]|다\.|요\.)\s+/).filter(Boolean);
+  const chunks=[];
+  for(const sentence of sentences){
+    let s=sentence.trim();
+    if(!s)continue;
+    if([...s].length<=34){chunks.push(s);continue;}
+    const words=s.split(' ');
+    let buf='';
+    for(const w of words){
+      const test=buf?buf+' '+w:w;
+      if([...test].length>28&&buf){chunks.push(buf);buf=w;}
+      else buf=test;
+    }
+    if(buf)chunks.push(buf);
+  }
+  return chunks.length?chunks:[clean];
+}
+
+function narrationCaptionAt(text,progress){
+  const chunks=splitNarrationCaptions(text);
+  if(!chunks.length)return '';
+  const i=Math.min(chunks.length-1,Math.floor(Math.max(0,Math.min(.999,progress))*chunks.length));
+  return chunks[i];
 }
 
 function getSceneAt(media,t){
@@ -320,7 +371,7 @@ async function makeVideo(){
       recorder.onerror=e=>reject(e.error||new Error('영상 녹화 오류'));
     });
 
-    const intro=3,outro=5;
+    const intro=2,outro=3;
     const total=intro+media.reduce((a,b)=>a+b.duration,0)+outro;
     const startAt=audioCtx.currentTime+.6;
 
@@ -331,7 +382,7 @@ async function makeVideo(){
     });
 
     recorder.start(1000);
-    $('videoStatus').textContent=`영상 렌더링 시작 · 예상 ${Math.ceil(total)}초 · 탭을 그대로 두세요.`;
+    $('videoStatus').textContent=`영상 렌더링 시작 · 약 ${Math.ceil(total)}초 · 사진 빠른 전환 + 내레이션 자막 적용 중...`;
 
     function drawFrame(){
       const t=Math.max(0,audioCtx.currentTime-startAt);
@@ -351,9 +402,21 @@ async function makeVideo(){
           const p=Math.min(1,st.local/st.duration);
           const imgs=m.images.length?m.images:[];
           if(imgs.length){
-            const slot=Math.min(imgs.length-1,Math.floor(p*imgs.length));
-            const subP=(p*imgs.length)-slot;
-            drawCover(ctx,imgs[slot],W,H,subP,st.i+slot);
+            const targetPhotoSeconds=Number($('photoSpeed')?.value)||3;
+            const slots=Math.max(1,Math.ceil(st.duration/targetPhotoSeconds));
+            const pos=(st.local/Math.max(.001,st.duration))*slots;
+            const slot=Math.min(slots-1,Math.floor(pos));
+            const localP=pos-slot;
+            const cur=imgs[slot%imgs.length];
+            const next=imgs[(slot+1)%imgs.length];
+            const fadeStart=.78;
+            if(localP>fadeStart&&imgs.length>1){
+              const f=(localP-fadeStart)/(1-fadeStart);
+              drawCover(ctx,cur,W,H,Math.min(1,localP),st.i+slot,1-f);
+              drawCover(ctx,next,W,H,Math.max(0,(localP-fadeStart)),st.i+slot+1,f);
+            }else{
+              drawCover(ctx,cur,W,H,Math.min(1,localP),st.i+slot,1);
+            }
           }else{
             ctx.fillStyle='#eef2f6';ctx.fillRect(0,0,W,H);
           }
@@ -367,9 +430,7 @@ async function makeVideo(){
           ctx.font=`600 ${Math.round(W*.017)}px "Noto Sans KR","Malgun Gothic",sans-serif`;
           ctx.fillText('강동자바라',W*.055,H*.1);
 
-          const subs=Array.isArray(m.scene.subtitles)&&m.scene.subtitles.length?m.scene.subtitles:[m.scene.caption||''];
-          const si=Math.min(subs.length-1,Math.floor(p*subs.length));
-          const subtitle=subs[si]||m.scene.caption||'';
+          const subtitle=narrationCaptionAt(m.scene.narration||m.scene.caption||'',p);
           ctx.textAlign='center';ctx.fillStyle='#fff';
           ctx.font=`700 ${Math.round(W*.035)}px "Noto Sans KR","Malgun Gothic",sans-serif`;
           const lines=wrapLines(ctx,subtitle,W*.82,2);
