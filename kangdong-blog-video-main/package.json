@@ -1,0 +1,10 @@
+{
+  "name": "kangdong-blog-video-v4",
+  "version": "4.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "cheerio": "^1.0.0",
+    "openai": "^6.0.0"
+  }
+}
