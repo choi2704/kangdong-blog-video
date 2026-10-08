@@ -8,11 +8,7 @@ function parseNaverUrl(input) {
 }
 
 function cleanText(s = '') {
-  return s
-    .replace(/\u00a0/g, ' ')
-    .replace(/[ \t]+/g, ' ')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim();
+  return s.replace(/\u00a0/g, ' ').replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
 }
 
 function decodeLoose(s = '') {
@@ -36,16 +32,13 @@ function normalizeUrl(src = '') {
 function looksLikeNaverImage(url = '') {
   const s = url.toLowerCase();
   if (!/^https?:\/\//.test(s)) return false;
-
   const naverCdn =
-    /(?:postfiles|blogfiles|post-phinf|blogpfthumb-phinf|blogthumb|phinf)\.(?:pstatic|naver)\.net/.test(s) ||
+    /(?:postfiles|blogfiles|post-phinf|blogpfthumb-phinf|blogthumb|mblogthumb-phinf|phinf)\.(?:pstatic|naver)\.net/.test(s) ||
     /(?:pstatic|naver)\.net/.test(s);
-
-  const imageLike = /\.(?:jpg|jpeg|png|gif|webp)(?:\?|$)/i.test(s) ||
-    /(?:postfiles|blogfiles|post-phinf|phinf)/i.test(s);
-
+  const imageLike =
+    /\.(?:jpg|jpeg|png|gif|webp)(?:\?|$)/i.test(s) ||
+    /(?:postfiles|blogfiles|post-phinf|mblogthumb-phinf|phinf)/i.test(s);
   const unwanted = /profile|emoji|sticker|icon|banner|logo|spacer|favicon|map_static|ogq_/i.test(s);
-
   return naverCdn && imageLike && !unwanted;
 }
 
@@ -60,22 +53,19 @@ function imageKey(url = '') {
 function collectUrlsFromString(raw = '') {
   const text = decodeLoose(raw);
   const found = [];
-
   const whole = normalizeUrl(text);
   if (looksLikeNaverImage(whole)) found.push(whole);
 
-  const re = /https?:\/\/[^\s"'<>\\]+/gi;
-  for (const m of text.matchAll(re)) {
-    const u = normalizeUrl(m[0].replace(/[),}\]]+$/, ''));
-    if (looksLikeNaverImage(u)) found.push(u);
+  const patterns = [
+    /https?:\/\/[^\s"'<>\\]+/gi,
+    /\/\/[^\s"'<>\\]+/gi
+  ];
+  for (const re of patterns) {
+    for (const m of text.matchAll(re)) {
+      const u = normalizeUrl(m[0].replace(/[),}\]]+$/, ''));
+      if (looksLikeNaverImage(u)) found.push(u);
+    }
   }
-
-  const protocolRelative = /\/\/[^\s"'<>\\]+/gi;
-  for (const m of text.matchAll(protocolRelative)) {
-    const u = normalizeUrl(m[0].replace(/[),}\]]+$/, ''));
-    if (looksLikeNaverImage(u)) found.push(u);
-  }
-
   return found;
 }
 
@@ -98,8 +88,7 @@ function parseContent(html) {
 
   function addImage(value) {
     if (!value) return;
-    const candidates = collectUrlsFromString(value);
-    for (const src of candidates) {
+    for (const src of collectUrlsFromString(value)) {
       const key = imageKey(src);
       if (!key || seen.has(key)) continue;
       seen.add(key);
@@ -108,23 +97,17 @@ function parseContent(html) {
   }
 
   container.find('img').each((_, el) => {
-    const attrs = el.attribs || {};
+    const a = el.attribs || {};
     [
-      attrs['data-lazy-src'],
-      attrs['data-src'],
-      attrs['data-original'],
-      attrs['data-img-src'],
-      attrs['data-image-url'],
-      attrs['src'],
-      attrs['srcset']
+      a['data-lazy-src'], a['data-src'], a['data-original'],
+      a['data-img-src'], a['data-image-url'], a['src'], a['srcset']
     ].forEach(addImage);
   });
 
   container.find('*').each((_, el) => {
     const attrs = el.attribs || {};
     for (const [name, value] of Object.entries(attrs)) {
-      if (!value) continue;
-      if (/src|image|photo|linkdata|module|url/i.test(name)) addImage(value);
+      if (value && /src|image|photo|linkdata|module|url/i.test(name)) addImage(value);
     }
   });
 
@@ -147,7 +130,6 @@ async function fetchHtml(url) {
     },
     redirect: 'follow'
   });
-
   if (!r.ok) throw new Error(`네이버 응답 오류: ${r.status}`);
   return await r.text();
 }
@@ -160,7 +142,6 @@ export default async function handler(req, res) {
     if (!url) return res.status(400).json({ error: '블로그 URL이 필요합니다.' });
 
     const { blogId, logNo } = parseNaverUrl(url);
-
     const candidates = [
       `https://m.blog.naver.com/${blogId}/${logNo}`,
       `https://m.blog.naver.com/PostView.naver?blogId=${encodeURIComponent(blogId)}&logNo=${encodeURIComponent(logNo)}`,
@@ -203,16 +184,16 @@ export default async function handler(req, res) {
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       ok: true,
       blogId,
       logNo,
       title: bestTitle,
       text: bestText.slice(0, 30000),
-      images: mergedImages.slice(0, 60),
-      debug: { imageCount: mergedImages.length, candidateErrors: errors }
+      images: mergedImages.slice(0, 60)
     });
+
   } catch (e) {
-    res.status(500).json({ error: e?.message || '추출 중 오류가 발생했습니다.' });
+    return res.status(500).json({ error: e?.message || '추출 중 오류가 발생했습니다.' });
   }
 }

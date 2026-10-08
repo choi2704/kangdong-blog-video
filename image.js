@@ -32,58 +32,38 @@ export default async function handler(req, res) {
     if (!raw) return res.status(400).send('missing url');
 
     const normalized = normalize(raw);
-
     let u;
-    try { u = new URL(normalized); }
-    catch { return res.status(400).send('bad url'); }
+    try { u = new URL(normalized); } catch { return res.status(400).send('bad url'); }
 
-    if (u.protocol !== 'https:' || !allowedHost(u.hostname)) {
-      return res.status(403).send('blocked host');
-    }
+    if (u.protocol !== 'https:' || !allowedHost(u.hostname)) return res.status(403).send('blocked host');
 
-    // Naver thumbnail URLs sometimes need an explicit resize type.
     if (u.hostname.includes('mblogthumb-phinf.pstatic.net') && !u.searchParams.has('type')) {
-      u.searchParams.set('type', 'w800');
+      u.searchParams.set('type', 'w1200');
     }
-
-    const referers = [
-      'https://m.blog.naver.com/',
-      'https://blog.naver.com/',
-      'https://www.naver.com/'
-    ];
 
     let r = null;
     let lastStatus = 0;
-
-    for (const ref of referers) {
+    for (const ref of ['https://m.blog.naver.com/','https://blog.naver.com/','https://www.naver.com/']) {
       try {
         const candidate = await tryFetch(u.toString(), ref);
         lastStatus = candidate.status;
-        if (candidate.ok) {
-          r = candidate;
-          break;
-        }
+        if (candidate.ok) { r = candidate; break; }
       } catch {}
     }
 
     if (!r) return res.status(lastStatus || 502).send('image fetch failed');
 
     const ct = r.headers.get('content-type') || 'image/jpeg';
-    if (!ct.toLowerCase().startsWith('image/')) {
-      return res.status(415).send('not image');
-    }
+    if (!ct.toLowerCase().startsWith('image/')) return res.status(415).send('not image');
 
-    const ab = await r.arrayBuffer();
-    const buf = Buffer.from(ab);
-
+    const buf = Buffer.from(await r.arrayBuffer());
     if (!buf.length) return res.status(502).send('empty image');
-    if (buf.length > 15 * 1024 * 1024) return res.status(413).send('image too large');
+    if (buf.length > 20 * 1024 * 1024) return res.status(413).send('image too large');
 
     res.setHeader('Content-Type', ct);
     res.setHeader('Cache-Control', 'public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400');
     res.setHeader('Access-Control-Allow-Origin', '*');
     return res.status(200).send(buf);
-
   } catch (e) {
     return res.status(500).send(e?.message || 'proxy error');
   }
